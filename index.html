@@ -30,13 +30,32 @@
                       "http://gittu.rs.af.cm/",  
                       {"code": code},  
                       function(responseText){  
-                          token = $.trim(responseText);
-                          alert(token);
+                          setToken($.trim(responseText));
                       },  
                       "html"  
                   ); 
-              }
+        }
+        
+        function setToken(t){
+            token = t;
+        }
         // End login code
+        
+        function listRepos(){
+            $.ajax({
+                     url: "https://api.github.com/user/repos",
+                     data: { 
+                             "type": "all",
+                             "updated" : "desc"
+                          },
+                     type: "GET",
+                     headers: {"Authorization": "token " + token}
+                  }).done(function(data) { 
+                      console.log(data);
+                  }).fail(function() { 
+                      alert("error getting repo list"); 
+                  });
+        }
         
         
         //Utility functions
