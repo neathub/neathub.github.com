@@ -14,7 +14,6 @@
     <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript">
     
-    (function (window) {
             
       $(document).ready(function () {
         $('#main_content').headsmart();
@@ -25,19 +24,18 @@
         var code = getURLParameter("code");
         console.log(code);
         
-        if (code){
-
-                var data =
-                    {
-                        'code': code,
-                        'client_id': "537693f51fcdd92eb755",
-                        'client_secret': "10f913008f94e306428f71bcac9acebc76b07860",
-                        'grant_type': 'authorization_code'
-
-                    };
-                    
-         
+        if (!token && code){
         
+            $.get(  
+                      "http://gittu.rs.af.cm/",  
+                      {"code": code},  
+                      function(responseText){  
+                          token = $.trim(responseText);
+                          alert(token);
+                      },  
+                      "html"  
+                  ); 
+              }
         // End login code
         
         

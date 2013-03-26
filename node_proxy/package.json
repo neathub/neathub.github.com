@@ -1,0 +1,18 @@
+{
+  "name": "gittu-proxy",
+  "version": "0.0.0",
+  "description": "Github OAuth 2.0 Proxy for Gittu",
+  "main": "application.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "dependencies":{
+      "request":""
+  },
+  "scripts": {
+      "start": "node application.js"
+  },
+  "author": "Mehdi Hasan Khan",
+  "license": "BSD"
+}
