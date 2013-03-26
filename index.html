@@ -13,6 +13,57 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript">
+    
+    (function (window) {
+      function CorsAjax() {
+        this.post = function(url, data, callback) {
+          $.support.cors = true;
+          var jqxhr = $.post(url, data, callback, "json")
+                 .error(function(jqXhHR, status, errorThrown) {
+                   if ($.browser.msie && window.XDomainRequest) {
+                       var xdr = new XDomainRequest();
+                       xdr.open("post", url);
+                       xdr.onload = function () {
+                        if (callback) {
+                         callback(
+                          JSON.parse(this.responseText), 
+                          'success');
+                        }
+                      };
+                      xdr.send(data);
+                   } else {
+                     alert("corsAjax.post error: " + status + ", " + errorThrown);
+                   }
+          });
+        };
+
+        this.get = function(url, callback) {
+            $.support.cors = true;
+            var jqxhr = $.get(url, null, callback, "json")
+                   .error(function(jqXhHR, status, errorThrown) {
+                      if ($.browser.msie && window.XDomainRequest) {
+                        var xdr = new XDomainRequest();
+                        xdr.open("get", url);
+                        xdr.onload = function () {
+                         if (callback) {
+                          callback(
+                           JSON.parse(this.responseText), 
+                           'success');
+                         }
+                        };
+                        xdr.send();
+                      } else {
+                        alert("corsAjax.get error: " + status + ", " + errorThrown);
+                      }
+                    });
+            };
+        };
+
+        window.corsAjax = new CorsAjax();
+    })(window);
+    
+    
+    
       $(document).ready(function () {
         $('#main_content').headsmart();
         
@@ -20,61 +71,102 @@
         // Start login code
         var token = "";
         var code = getURLParameter("code");
+        console.log(code);
         
         if (code){
-            var xhr = new XMLHttpRequest();
-            xhr.addEventListener('readystatechange', function(event) {
-              if (xhr.readyState == 4) {
-                btnAuthorize.button('reset');
-                if (xhr.status == 200) {
-                  var accessToken = {}, response = xhr.responseText;
-                  accessToken.created_time = new Date().valueOf();
-                  try{
-                    var parsedResponse = JSON.parse(response);
-                    restclient.log(parsedResponse);
-                    restclient.log(typeof parsedResponse.expires_in);
-                    if(typeof parsedResponse.access_token === 'string')
-                      accessToken.access_token = parsedResponse.access_token;
-                    if(typeof parsedResponse.refresh_token === 'string')
-                      accessToken.refresh_token = parsedResponse.refresh_token;
-                    if(typeof parsedResponse.expires_in !== 'undefined')
-                      accessToken.expires_in = parsedResponse.expires_in;
-                  }catch(e){
-                    console.error(e);
-                    accessToken.access_token = response.match(/access_token=([^&]*)/) ? response.match(/access_token=([^&]*)/)[1] : false;
-                    accessToken.refresh_token = response.match(/refresh_token=([^&]*)/) ? response.match(/refresh_token=([^&]*)/)[1] : false;
-                    accessToken.expires_in = response.match(/expires_in=([^&]*)/) ? response.match(/expires_in=([^&]*)/)[1] : false;
-                  }
 
-                  token = accessToken;
-                  alert(token);
+                var data =
+                    {
+                        'code': code,
+                        'client_id': "537693f51fcdd92eb755",
+                        'client_secret': "10f913008f94e306428f71bcac9acebc76b07860",
+                        'grant_type': 'authorization_code'
 
-                  return;
+                    };
+                    
+                corsAjax.post("https://github.com/login/oauth/access_token", data, getToken);
+                
+                function getToken(response, msg){
+                    var accessToken = {}, response = xhr.responseText;
+                      accessToken.created_time = new Date().valueOf();
+                      try{
+                        var parsedResponse = JSON.parse(response);
+                        restclient.log(parsedResponse);
+                        restclient.log(typeof parsedResponse.expires_in);
+                        if(typeof parsedResponse.access_token === 'string')
+                          accessToken.access_token = parsedResponse.access_token;
+                        if(typeof parsedResponse.refresh_token === 'string')
+                          accessToken.refresh_token = parsedResponse.refresh_token;
+                        if(typeof parsedResponse.expires_in !== 'undefined')
+                          accessToken.expires_in = parsedResponse.expires_in;
+                      }catch(e){
+                        console.error(e);
+                        accessToken.access_token = response.match(/access_token=([^&]*)/) ? response.match(/access_token=([^&]*)/)[1] : false;
+                        accessToken.refresh_token = response.match(/refresh_token=([^&]*)/) ? response.match(/refresh_token=([^&]*)/)[1] : false;
+                        accessToken.expires_in = response.match(/expires_in=([^&]*)/) ? response.match(/expires_in=([^&]*)/)[1] : false;
+                      }
+
+                      token = accessToken;
+                      alert(token);
                 }
-              }
-            });
+            }
             
-            var req = {
-                'code': code,
-                'client_id': "537693f51fcdd92eb755",
-                'client_secret': "10f913008f94e306428f71bcac9acebc76b07860",
-                'grant_type': 'authorization_code'
-              };
-      
-              xhr.open(param.token_method, "https://github.com/login/oauth/access_token", true);
-              xhr.setRequestHeader("Content-Type", 'application/x-www-form-urlencoded;charset=UTF-8');
-              xhr.send(req);
-        }
+            // var xhr = new XMLHttpRequest();
+            
+            // xhr.addEventListener('readystatechange', function(event) {
+//               if (xhr.readyState == 4) {
+// 
+//                 if (xhr.status == 200) {
+//                   var accessToken = {}, response = xhr.responseText;
+//                   accessToken.created_time = new Date().valueOf();
+//                   try{
+//                     var parsedResponse = JSON.parse(response);
+//                     restclient.log(parsedResponse);
+//                     restclient.log(typeof parsedResponse.expires_in);
+//                     if(typeof parsedResponse.access_token === 'string')
+//                       accessToken.access_token = parsedResponse.access_token;
+//                     if(typeof parsedResponse.refresh_token === 'string')
+//                       accessToken.refresh_token = parsedResponse.refresh_token;
+//                     if(typeof parsedResponse.expires_in !== 'undefined')
+//                       accessToken.expires_in = parsedResponse.expires_in;
+//                   }catch(e){
+//                     console.error(e);
+//                     accessToken.access_token = response.match(/access_token=([^&]*)/) ? response.match(/access_token=([^&]*)/)[1] : false;
+//                     accessToken.refresh_token = response.match(/refresh_token=([^&]*)/) ? response.match(/refresh_token=([^&]*)/)[1] : false;
+//                     accessToken.expires_in = response.match(/expires_in=([^&]*)/) ? response.match(/expires_in=([^&]*)/)[1] : false;
+//                   }
+// 
+//                   token = accessToken;
+//                   alert(token);
+// 
+//                   return;
+//                 }
+//               }
+//             });
+//             
+//             var req = {
+//                 'code': code,
+//                 'client_id': "537693f51fcdd92eb755",
+//                 'client_secret': "10f913008f94e306428f71bcac9acebc76b07860",
+//                 'grant_type': 'authorization_code'
+//               };
+//       
+//               xhr.open("POST", "https://github.com/login/oauth/access_token", true);
+//               xhr.setRequestHeader("Content-Type", 'text/plain');
+//               xhr.send(req);
+//         }
         
         // End login code
         
         
         //Utility functions
-        var getURLParameter = function getURLParameter(name) {
+        function getURLParameter(name) {
             return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
         }
         
-      })
+      });
+
+      
     </script>
     <title>neathub.github.com by neathub</title>
   </head>
