@@ -14,7 +14,66 @@
     <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript">
       $(document).ready(function () {
-        $('#main_content').headsmart()
+        $('#main_content').headsmart();
+        
+        
+        // Start login code
+        var token = "";
+        var code = getURLParameter("code");
+        
+        if (code){
+            var xhr = new XMLHttpRequest();
+            xhr.addEventListener('readystatechange', function(event) {
+              if (xhr.readyState == 4) {
+                btnAuthorize.button('reset');
+                if (xhr.status == 200) {
+                  var accessToken = {}, response = xhr.responseText;
+                  accessToken.created_time = new Date().valueOf();
+                  try{
+                    var parsedResponse = JSON.parse(response);
+                    restclient.log(parsedResponse);
+                    restclient.log(typeof parsedResponse.expires_in);
+                    if(typeof parsedResponse.access_token === 'string')
+                      accessToken.access_token = parsedResponse.access_token;
+                    if(typeof parsedResponse.refresh_token === 'string')
+                      accessToken.refresh_token = parsedResponse.refresh_token;
+                    if(typeof parsedResponse.expires_in !== 'undefined')
+                      accessToken.expires_in = parsedResponse.expires_in;
+                  }catch(e){
+                    console.error(e);
+                    accessToken.access_token = response.match(/access_token=([^&]*)/) ? response.match(/access_token=([^&]*)/)[1] : false;
+                    accessToken.refresh_token = response.match(/refresh_token=([^&]*)/) ? response.match(/refresh_token=([^&]*)/)[1] : false;
+                    accessToken.expires_in = response.match(/expires_in=([^&]*)/) ? response.match(/expires_in=([^&]*)/)[1] : false;
+                  }
+
+                  token = accessToken;
+                  alert(token);
+
+                  return;
+                }
+              }
+            });
+            
+            var req = {
+                'code': code,
+                'client_id': "537693f51fcdd92eb755",
+                'client_secret': "10f913008f94e306428f71bcac9acebc76b07860",
+                'grant_type': 'authorization_code'
+              };
+      
+              xhr.open(param.token_method, "https://github.com/login/oauth/access_token", true);
+              xhr.setRequestHeader("Content-Type", 'application/x-www-form-urlencoded;charset=UTF-8');
+              xhr.send(req);
+        }
+        
+        // End login code
+        
+        
+        //Utility functions
+        var getURLParameter = function getURLParameter(name) {
+            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+        }
+        
       })
     </script>
     <title>neathub.github.com by neathub</title>
@@ -47,6 +106,7 @@
       <section id="main_content">
         <h3>Welcome to GitHub Pages.</h3>
 
+<a href="https://github.com/login/oauth/authorize?client_id=537693f51fcdd92eb755">Authorize via Github</a>
 <p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
 
 <pre><code>$ cd your_repo_root/repo_name
