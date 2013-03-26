@@ -22,7 +22,6 @@
         // Start login code
         var token = "";
         var code = getURLParameter("code");
-        console.log(code);
         
         if (!token && code){
         
@@ -50,9 +49,10 @@
                              "updated" : "desc"
                           },
                      type: "GET",
+                     dataType: "json",
                      headers: {"Authorization": "token " + token}
                   }).done(function(data) { 
-                      console.log(data);
+                      console.log(JSON.stringify(data));
                   }).fail(function() { 
                       alert("error getting repo list"); 
                   });
